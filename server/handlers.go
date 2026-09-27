@@ -40,12 +40,20 @@ func (s *Server) RenderPDFHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	defer pdfStream.Close()
 
-	w.Header().Set("Content-Type", "application/pdf")
-	w.Header().Set("Content-Disposition", fmt.Sprintf("inline; filename=\"%s.pdf\"", templateName))
+	responseType := r.URL.Query().Get("response")
+	switch responseType {
+	case "link":
+	case "redirect":
+	case "binary":
+	default:
+		// Stream file as response
+		w.Header().Set("Content-Type", "application/pdf")
+		w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s.pdf\"", templateName))
 
-	// Stream binary bytes directly from Gotenberg to the client HTTP response
-	if _, err := io.Copy(w, pdfStream); err != nil {
-		log.Printf("Error streaming PDF to client: %v", err)
+		// Stream binary bytes directly from Gotenberg to the client HTTP response
+		if _, err := io.Copy(w, pdfStream); err != nil {
+			log.Printf("Error streaming PDF to client: %v", err)
+		}
 	}
 
 	log.Printf("Successfully generated pdf from template named: %s", templateName)

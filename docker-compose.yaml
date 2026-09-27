@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # --------------------------------------------------
   # Gotenberg Engine (Chromium + LibreOffice rendering)
