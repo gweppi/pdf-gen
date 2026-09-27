@@ -23,9 +23,9 @@ func main() {
 
 	// Set path to access generated documents
 	generatedHandler := srv.ServeGeneratedPDFHandler
-	if cfg.ApiKey != "" {
-		generatedHandler = server.APIKeyMiddleware(cfg.ApiKey, srv.ServeGeneratedPDFHandler)
-	}
+	// if cfg.ApiKey != "" {
+	// 	generatedHandler = server.APIKeyMiddleware(cfg.ApiKey, srv.ServeGeneratedPDFHandler)
+	// }
 
 	http.HandleFunc("/generated/", generatedHandler)
 
