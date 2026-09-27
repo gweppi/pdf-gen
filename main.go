@@ -4,28 +4,36 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/gweppi/pdf-gen/generator"
+	"github.com/gweppi/pdf-gen/config"
 	"github.com/gweppi/pdf-gen/server"
 )
 
 func main() {
-	config := LoadConfig()
+	cfg := config.Load()
 
-	pdfGenerator := generator.NewPDFGenerator(config.templatesDir, config.gotenbergUrl)
-	srv := server.NewServer(pdfGenerator)
+	srv := server.NewServer(&cfg)
 
 	// Add API Key auth if env var set
-	handler := srv.RenderPDFHandler
-	if config.apiKey != "" {
-		handler = server.APIKeyMiddleware(config.apiKey, srv.RenderPDFHandler)
+	renderHandler := srv.RenderPDFHandler
+	if cfg.ApiKey != "" {
+		renderHandler = server.APIKeyMiddleware(cfg.ApiKey, srv.RenderPDFHandler)
 	}
 
-	http.HandleFunc("/render/", handler)
+	http.HandleFunc("/render/", renderHandler)
 
-	log.Printf("PDF Rendering Server running on http://localhost:%s", config.port)
-	log.Printf("Send POST requests to http://localhost:%s/render/<template_name>", config.port)
+	// Set path to access generated documents
+	generatedHandler := srv.ServeGeneratedPDFHandler
+	if cfg.ApiKey != "" {
+		generatedHandler = server.APIKeyMiddleware(cfg.ApiKey, srv.ServeGeneratedPDFHandler)
+	}
 
-	if err := http.ListenAndServe(":"+config.port, nil); err != nil {
+	http.HandleFunc("/generated/", generatedHandler)
+
+	log.Printf("PDF Rendering Server running on %s", cfg.Hostname)
+	log.Printf("Send POST requests to %srender/<template_name>", cfg.Hostname)
+	log.Printf("Send GET requests to %sgenerate/<file_name>.pdf", cfg.Hostname)
+
+	if err := http.ListenAndServe(":"+cfg.Port, nil); err != nil {
 		log.Fatalf("Server failed to start: %v", err)
 	}
 }

@@ -28,6 +28,7 @@ services:
       - GOTENBERG_URL=http://gotenberg:3000
     volumes:
       - ./templates:/app/templates
+      - ./output:/app/output
     depends_on:
       - gotenberg
 

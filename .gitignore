@@ -3,6 +3,7 @@
 
 test_data
 templates
+output
 
 # For testing purposes I always export the file to my working dir
 result.pdf
