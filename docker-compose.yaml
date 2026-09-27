@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  # --------------------------------------------------
+  # Gotenberg Engine (Chromium + LibreOffice rendering)
+  # --------------------------------------------------
+  gotenberg:
+    image: gotenberg/gotenberg:8
+    container_name: pdf_gotenberg
+    restart: unless-stopped
+    command:
+      - "gotenberg"
+      - "--chromium-allow-list=file:///tmp/.*"
+      - "--log-level=info"
+
+  # --------------------------------------------------
+  # Your Go PDF API Gateway Service
+  # --------------------------------------------------
+  pdf-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: pdf_service
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    env_file: .env
+    environment:
+      # Use the local address when using this compose file
+      - GOTENBERG_URL=http://gotenberg:3000
+    volumes:
+      - ./templates:/app/templates
+    depends_on:
+      - gotenberg
+
+networks:
+  default:
+    name: pdf_network

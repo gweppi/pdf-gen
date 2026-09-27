@@ -1,0 +1,8 @@
+.env*
+!.env.example
+
+test_data
+templates
+
+# For testing purposes I always export the file to my working dir
+result.pdf
