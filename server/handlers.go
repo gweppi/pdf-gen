@@ -59,6 +59,7 @@ func (s *Server) RenderPDFHandler(w http.ResponseWriter, r *http.Request) {
 
 	dst, err := os.OpenFile(fullPath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0600)
 	if err != nil {
+		log.Printf("os.OpenFile failed for path %q: %v", fullPath, err)
 		http.Error(w, "Failed to store file on server", http.StatusInternalServerError)
 		return
 	}
@@ -67,6 +68,7 @@ func (s *Server) RenderPDFHandler(w http.ResponseWriter, r *http.Request) {
 	if _, err := io.Copy(dst, pdfStream); err != nil {
 		// If streaming fails, clean up the partial file
 		os.Remove(fullPath)
+		log.Printf("failed to write to disk %q: %v", fullPath, err)
 		http.Error(w, "Failed to write file to disk", http.StatusInternalServerError)
 		return
 	}
